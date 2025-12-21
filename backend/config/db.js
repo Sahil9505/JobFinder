@@ -1,37 +1,49 @@
-// Import mongoose library for MongoDB connection
 const mongoose = require('mongoose');
 
-let isConnected = false; // track connection status
+let cached = global.mongoose;
 
-// Function to connect to MongoDB database
+if (!cached) {
+    cached = global.mongoose = { conn: null, promise: null };
+}
+
 const connectDB = async () => {
-    // If already connected, return immediately
-    if (isConnected) {
-        console.log('Using existing MongoDB connection');
-        return;
+    // Return existing connection if available
+    if (cached.conn && mongoose.connection.readyState === 1) {
+        return cached.conn;
     }
 
-    try {
-        // Connect to MongoDB using the connection string from environment variables
-        // MONGO_URI is stored in .env file for security
-        const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/internfinder';
-        const conn = await mongoose.connect(mongoUri);
-
-        isConnected = conn.connection.readyState === 1;
-        // If connection is successful, display this message
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
-    } catch (error) {
-        // If connection fails, display the error message
-        console.error(`Error: ${error.message}`);
-        // Exit the process if database connection fails (only in development)
-        if (process.env.NODE_ENV !== 'production') {
-            process.exit(1);
-        }
-        throw error;
+    // Return pending connection promise if exists
+    if (cached.promise) {
+        return cached.promise;
     }
+
+    if (!process.env.MONGO_URI) {
+        throw new Error('MONGO_URI environment variable is not defined');
+    }
+
+    const opts = {
+        bufferCommands: false,
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 10000,
+        socketTimeoutMS: 45000,
+    };
+
+    // Create new connection promise
+    cached.promise = mongoose.connect(process.env.MONGO_URI, opts)
+        .then((mongoose) => {
+            console.log(`✓ MongoDB Connected: ${mongoose.connection.host}`);
+            return mongoose;
+        })
+        .catch((error) => {
+            cached.promise = null; // Reset on failure
+            console.error('✗ MongoDB connection failed:', error.message);
+            throw new Error(`Database connection failed: ${error.message}`);
+        });
+
+    cached.conn = await cached.promise;
+    return cached.conn;
 };
 
-// Export the function so it can be used in other files
 module.exports = connectDB;
 
 

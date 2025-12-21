@@ -1,61 +1,58 @@
-// Import Express framework
 const express = require('express');
-// Import CORS to allow frontend requests
 const cors = require('cors');
-// Import dotenv to load environment variables from .env file
-require('dotenv').config();
-// Import the database connection function
+const path = require('path');
 const connectDB = require('./config/db');
 
-// Create an Express application
+// Validate required environment variables
+const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+    throw new Error(`FATAL: Missing required environment variables: ${missingEnvVars.join(', ')}. Configure them in Vercel dashboard.`);
+}
+
 const app = express();
 
-// Enable CORS - allows frontend to make requests to backend
+// Strict CORS configuration for production
+const allowedOrigins = process.env.FRONTEND_URL 
+    ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+    : ['http://localhost:5173', 'http://localhost:3000'];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
+    origin: function(origin, callback) {
+        // Allow requests with no origin (mobile apps, curl, etc)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) === -1) {
+            return callback(new Error(`CORS: Origin ${origin} not allowed`), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Middleware to parse JSON data from request body
-// This allows us to access req.body in routes
 app.use(express.json());
 
-// Middleware to ensure database connection for each request in production
+// Lazy database connection middleware for serverless
 app.use(async (req, res, next) => {
     try {
         await connectDB();
         next();
     } catch (error) {
-        res.status(500).json({ message: 'Database connection failed', error: error.message });
+        console.error('DB connection failed:', error);
+        return res.status(503).json({ 
+            success: false,
+            message: 'Service temporarily unavailable - database connection failed',
+            error: process.env.NODE_ENV === 'production' ? undefined : error.message
+        });
     }
 });
 
-// Serve uploaded files (resumes)
-const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Define the port number from environment variable or default to 3100
 const PORT = process.env.PORT || 3100;
-
-// Connect to MongoDB database (only in development)
-if (process.env.NODE_ENV !== 'production') {
-    connectDB().then(async () => {
-        try {
-            const Job = require('./models/Job');
-            const seedJobs = require('./scripts/seedJobs');
-            const count = await Job.countDocuments();
-            if (count === 0) {
-                console.log('Jobs collection empty — seeding sample jobs...');
-                const seeded = await seedJobs();
-                console.log(`Auto-seeded ${seeded} jobs`);
-            } else {
-                console.log(`Jobs collection has ${count} records`);
-            }
-        } catch (err) {
-            console.error('Error during auto-seed:', err);
-        }
-    }).catch(err => console.error('DB connection error during startup:', err));
-}
 
 // Import auth routes
 const authRoutes = require('./routes/authRoutes');
@@ -82,19 +79,40 @@ const companiesRoutes = require('./routes/companiesRoutes');
 // Use companies routes - all routes in companiesRoutes will be prefixed with /api/companies
 app.use('/api/companies', companiesRoutes);
 
-// Define a route for the root path "/"
-// When someone visits "http://localhost:5000/", this function runs
+// Health check endpoint
 app.get('/', (req, res) => {
-    // Send a test message as response
-    res.send('Hello! This is a test message from the Express server.');
+    res.json({ 
+        success: true,
+        message: 'JobFinder API is running',
+        environment: process.env.NODE_ENV || 'development',
+        timestamp: new Date().toISOString()
+    });
 });
 
-// Start the server and listen on the specified port
-// Only start the server if not in serverless environment (Vercel)
-if (process.env.NODE_ENV !== 'production') {
+// 404 handler for undefined routes
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: `Route ${req.method} ${req.path} not found`
+    });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Internal server error',
+        error: process.env.NODE_ENV === 'production' ? undefined : err.stack
+    });
+});
+
+// Start server in local development only
+if (require.main === module) {
     app.listen(PORT, () => {
-        // This message will appear in the terminal when server starts
-        console.log(`Server is running on http://localhost:${PORT}`);
+        console.log(`✓ Server running on http://localhost:${PORT}`);
+        console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`✓ CORS origins: ${allowedOrigins.join(', ')}`);
     });
 }
 
