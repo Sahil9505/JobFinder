@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getServerURL } from '../services/api';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -96,7 +97,7 @@ const Navbar = () => {
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg overflow-hidden">
                       {user?.profileImage ? (
                         <img 
-                          src={`http://localhost:3100${user.profileImage}`} 
+                          src={`${getServerURL()}${user.profileImage}`} 
                           alt={user.name} 
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -246,7 +247,7 @@ const Navbar = () => {
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg overflow-hidden">
                       {user?.profileImage ? (
                         <img 
-                          src={`http://localhost:3100${user.profileImage}`} 
+                          src={`${getServerURL()}${user.profileImage}`} 
                           alt={user.name} 
                           className="w-full h-full object-cover"
                           onError={(e) => {

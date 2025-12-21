@@ -136,9 +136,6 @@ const Jobs = () => {
     try {
       setLoading(true);
       
-      // Debug: Log the API URL being used
-      console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:3100/api');
-      
       // Fetch platform jobs from MongoDB (our database) - request India-only
       const platformResponse = await getJobs({ country: 'India' });
       console.log('Platform response:', platformResponse);

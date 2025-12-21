@@ -2,10 +2,15 @@
 const jwt = require('jsonwebtoken');
 // Import User model to check if user exists
 const User = require('../models/User');
+// Import DB connection
+const connectDB = require('../config/db');
 
 // Middleware function to protect routes (verify JWT token)
 const protect = async (req, res, next) => {
     try {
+        // Ensure database connection
+        await connectDB();
+        
         let token;
 
         // Check if Authorization header exists and starts with "Bearer"
@@ -48,6 +53,7 @@ const protect = async (req, res, next) => {
 
         } catch (error) {
             // If token verification fails, return error
+            console.error('Token verification failed:', error.message);
             return res.status(401).json({
                 success: false,
                 message: 'Not authorized, invalid token'
@@ -56,6 +62,7 @@ const protect = async (req, res, next) => {
 
     } catch (error) {
         // If any other error occurs, return error
+        console.error('Auth middleware error:', error);
         return res.status(500).json({
             success: false,
             message: 'Server error',

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { updateProfile, changePassword, sendVerificationEmail, getAccountActivity, getMyApplications } from '../services/api';
+import { updateProfile, changePassword, sendVerificationEmail, getAccountActivity, getMyApplications, getServerURL } from '../services/api';
 import PasswordStrengthIndicator, { validatePassword } from '../components/PasswordStrengthIndicator';
 
 const Profile = () => {
@@ -411,7 +411,7 @@ const Profile = () => {
                       {imagePreview ? (
                         <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                       ) : user.profileImage ? (
-                        <img src={`http://localhost:3100${user.profileImage}`} alt="Profile" className="w-full h-full object-cover" />
+                        <img src={`${getServerURL()}${user.profileImage}`} alt="Profile" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-white text-5xl font-bold bg-gradient-to-br from-violet-500 to-fuchsia-500">
                           {user.name?.charAt(0).toUpperCase() || 'U'}

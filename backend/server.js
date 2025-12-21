@@ -25,6 +25,8 @@ const allowedOrigins = process.env.FRONTEND_URL
     ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
     : ['http://localhost:5173', 'http://localhost:3000'];
 
+console.log('🌐 CORS allowed origins:', allowedOrigins);
+
 app.use(cors({
     origin: function(origin, callback) {
         // Allow requests with no origin (mobile apps, curl, Postman, etc)
@@ -35,14 +37,19 @@ app.use(cors({
             return callback(null, true);
         }
         
-        // Allow any Vercel preview deployment URLs (sahil9505s-projects.vercel.app)
-        if (origin.includes('sahil9505s-projects.vercel.app') || 
-            origin.includes('job-finder-front') ||
-            origin.includes('localhost')) {
+        // Allow any Vercel preview deployment URLs
+        if (origin.includes('.vercel.app')) {
+            console.log(`✓ CORS: Allowing Vercel origin: ${origin}`);
             return callback(null, true);
         }
         
-        console.log(`CORS: Origin ${origin} not in allowed list`);
+        // Allow localhost during development
+        if (origin.includes('localhost')) {
+            console.log(`✓ CORS: Allowing localhost origin: ${origin}`);
+            return callback(null, true);
+        }
+        
+        console.log(`✗ CORS: Origin ${origin} not in allowed list`);
         return callback(new Error(`CORS: Origin ${origin} not allowed`), false);
     },
     credentials: true,
