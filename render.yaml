@@ -4,7 +4,6 @@ services:
     name: jobfinder-backend
     env: node
     region: oregon
-    plan: free
     buildCommand: cd backend && npm install
     startCommand: cd backend && npm start
     healthCheckPath: /health
@@ -24,7 +23,6 @@ services:
   - type: web
     name: jobfinder-frontend
     env: static
-    plan: free
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
     routes:
