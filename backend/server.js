@@ -20,23 +20,33 @@ console.log('🗄️  MONGO_URI:', process.env.MONGO_URI ? '✓ Set' : '✗ Miss
 
 const app = express();
 
-// Strict CORS configuration for production
+// CORS configuration - Allow Vercel preview deployments
 const allowedOrigins = process.env.FRONTEND_URL 
     ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
     : ['http://localhost:5173', 'http://localhost:3000'];
 
 app.use(cors({
     origin: function(origin, callback) {
-        // Allow requests with no origin (mobile apps, curl, etc)
+        // Allow requests with no origin (mobile apps, curl, Postman, etc)
         if (!origin) return callback(null, true);
         
-        if (allowedOrigins.indexOf(origin) === -1) {
-            return callback(new Error(`CORS: Origin ${origin} not allowed`), false);
+        // Allow exact matches
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            return callback(null, true);
         }
-        return callback(null, true);
+        
+        // Allow any Vercel preview deployment URLs (sahil9505s-projects.vercel.app)
+        if (origin.includes('sahil9505s-projects.vercel.app') || 
+            origin.includes('job-finder-front') ||
+            origin.includes('localhost')) {
+            return callback(null, true);
+        }
+        
+        console.log(`CORS: Origin ${origin} not in allowed list`);
+        return callback(new Error(`CORS: Origin ${origin} not allowed`), false);
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
