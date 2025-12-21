@@ -3,7 +3,6 @@
 
 const connectDB = require('../config/db');
 const Job = require('../models/Job');
-require('dotenv').config();
 
 const seedJobs = async () => {
   try {

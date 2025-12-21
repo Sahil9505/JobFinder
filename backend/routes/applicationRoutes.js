@@ -13,14 +13,12 @@ const router = express.Router();
 // Multer setup for resume uploads
 const path = require('path');
 const multer = require('multer');
-const resumesDir = path.join(__dirname, '..', 'uploads', 'resumes');
 const fs = require('fs');
-// Ensure upload directory exists
-if (!fs.existsSync(resumesDir)) fs.mkdirSync(resumesDir, { recursive: true });
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, resumesDir),
-    filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g,'-')}`)
-});
+
+// File uploads disabled in serverless - use memory storage temporarily
+// TODO: Integrate cloud storage (Cloudinary/S3) for production
+const storage = multer.memoryStorage();
+
 const upload = multer({
     storage,
     fileFilter: (req, file, cb) => {
