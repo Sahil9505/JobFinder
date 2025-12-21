@@ -17,6 +17,7 @@ import UploadJob from './pages/UploadJob';
 import About from './pages/About';
 import JobDetail from './pages/JobDetail';
 import Profile from './pages/Profile';
+import ApiTest from './pages/ApiTest';
 
 // Main App Component
 function App() {
@@ -38,6 +39,7 @@ function App() {
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/jobs/:id" element={<JobDetail />} />
         <Route path="/companies" element={<Companies />} />
+        <Route path="/api-test" element={<ApiTest />} />
         <Route path="/upload-job" element={
           <ProtectedRoute>
             <UploadJob />
