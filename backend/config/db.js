@@ -24,8 +24,9 @@ const connectDB = async () => {
     const opts = {
         bufferCommands: false,
         maxPoolSize: 10,
-        serverSelectionTimeoutMS: 10000,
+        serverSelectionTimeoutMS: 15000,
         socketTimeoutMS: 45000,
+        family: 4, // Use IPv4, skip trying IPv6
     };
 
     // Create new connection promise

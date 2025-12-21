@@ -8,8 +8,15 @@ const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET'];
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
-    throw new Error(`FATAL: Missing required environment variables: ${missingEnvVars.join(', ')}. Configure them in Vercel dashboard.`);
+    console.error(`❌ FATAL: Missing env vars: ${missingEnvVars.join(', ')}`);
+    console.error('Available env vars:', Object.keys(process.env).filter(k => !k.includes('SECRET') && !k.includes('PASSWORD')).join(', '));
 }
+
+// Log startup info
+console.log('🚀 Starting JobFinder API...');
+console.log('📍 Environment:', process.env.NODE_ENV || 'development');
+console.log('🔑 JWT_SECRET:', process.env.JWT_SECRET ? '✓ Set' : '✗ Missing');
+console.log('🗄️  MONGO_URI:', process.env.MONGO_URI ? '✓ Set' : '✗ Missing');
 
 const app = express();
 
@@ -35,21 +42,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// Lazy database connection middleware for serverless
-app.use(async (req, res, next) => {
-    try {
-        await connectDB();
-        next();
-    } catch (error) {
-        console.error('DB connection failed:', error);
-        return res.status(503).json({ 
-            success: false,
-            message: 'Service temporarily unavailable - database connection failed',
-            error: process.env.NODE_ENV === 'production' ? undefined : error.message
-        });
-    }
-});
-
+// Note: DB connection happens lazily in routes when needed
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const PORT = process.env.PORT || 3100;
@@ -79,14 +72,39 @@ const companiesRoutes = require('./routes/companiesRoutes');
 // Use companies routes - all routes in companiesRoutes will be prefixed with /api/companies
 app.use('/api/companies', companiesRoutes);
 
-// Health check endpoint
+// Health check endpoint - NO DB CONNECTION
 app.get('/', (req, res) => {
     res.json({ 
         success: true,
         message: 'JobFinder API is running',
         environment: process.env.NODE_ENV || 'development',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        env_check: {
+            mongo_uri: !!process.env.MONGO_URI,
+            jwt_secret: !!process.env.JWT_SECRET,
+            frontend_url: !!process.env.FRONTEND_URL
+        }
     });
+});
+
+// Database health check endpoint
+app.get('/health', async (req, res) => {
+    try {
+        await connectDB();
+        res.json({
+            success: true,
+            message: 'Database connected',
+            mongodb: 'Connected ✓',
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(503).json({
+            success: false,
+            message: 'Database connection failed',
+            error: error.message,
+            mongo_uri_set: !!process.env.MONGO_URI
+        });
+    }
 });
 
 // 404 handler for undefined routes
