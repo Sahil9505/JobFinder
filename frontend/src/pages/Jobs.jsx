@@ -135,43 +135,57 @@ const Jobs = () => {
   const fetchJobs = async () => {
     try {
       setLoading(true);
+      console.log('🔍 [Jobs] Starting to fetch jobs...');
+      console.log('🌐 [Jobs] API Base URL:', import.meta.env.VITE_API_URL || 'using default');
       
       // Fetch platform jobs from MongoDB (our database) - request India-only
+      console.log('📡 [Jobs] Fetching platform jobs (India-only)...');
       const platformResponse = await getJobs({ country: 'India' });
-      console.log('Platform response:', platformResponse);
+      console.log('✅ [Jobs] Platform response:', platformResponse);
       
       let platformJobs = [];
-      if (platformResponse.success) {
+      if (platformResponse && platformResponse.success && platformResponse.data) {
         // Add source field to platform jobs
         platformJobs = platformResponse.data.map(job => ({
           ...job,
           source: 'platform' // Mark as platform job
         }));
-        console.log(`Fetched ${platformJobs.length} platform jobs`);
+        console.log(`✅ [Jobs] Loaded ${platformJobs.length} platform jobs`);
       } else {
-        console.warn('Platform jobs fetch unsuccessful:', platformResponse);
+        console.warn('⚠️ [Jobs] Platform jobs fetch unsuccessful:', platformResponse);
       }
 
       // Fetch external jobs from public APIs (Remotive, etc.)
       let externalJobs = [];
       try {
+        console.log('📡 [Jobs] Fetching external jobs...');
         const externalResponse = await getExternalJobs();
-        if (externalResponse.success && externalResponse.data) {
+        console.log('✅ [Jobs] External response:', externalResponse);
+        
+        if (externalResponse && externalResponse.success && externalResponse.data) {
           externalJobs = externalResponse.data.map(job => ({
             ...job,
             source: 'external' // Already marked in backend, but ensure it's there
           }));
-          console.log(`Fetched ${externalJobs.length} external jobs`);
+          console.log(`✅ [Jobs] Loaded ${externalJobs.length} external jobs`);
         }
       } catch (externalError) {
         // If external API fails, continue with platform jobs only
-        console.error('Error fetching external jobs:', externalError);
+        console.error('❌ [Jobs] Error fetching external jobs:', externalError);
         // Graceful degradation - show platform jobs even if external fails
       }
 
       // Merge both job sources into one array
       const allJobs = [...platformJobs, ...externalJobs];
-      console.log(`Total jobs: ${allJobs.length}`);
+      console.log(`📊 [Jobs] Total jobs: ${allJobs.length} (${platformJobs.length} platform + ${externalJobs.length} external)`);
+      
+      if (allJobs.length === 0) {
+        console.warn('⚠️ [Jobs] No jobs available. Possible reasons:');
+        console.warn('  1. Backend not deployed or not accessible');
+        console.warn('  2. No jobs in MongoDB database (run: node scripts/seedJobs.js)');
+        console.warn('  3. API URL misconfigured in environment variables');
+        console.warn('  4. CORS blocking the request');
+      }
       
       setJobs(allJobs);
       setFilteredJobs(allJobs);

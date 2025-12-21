@@ -41,39 +41,75 @@ const Home = () => {
   const fetchJobs = async () => {
     try {
       setLoading(true);
+      console.log('🔍 [Home] Starting to fetch jobs...');
+      console.log('🌐 [Home] API Base URL:', import.meta.env.VITE_API_URL || 'using default');
       
       // Fetch platform jobs from MongoDB (our database)
+      console.log('📡 [Home] Fetching platform jobs...');
       const platformResponse = await getJobs();
+      console.log('✅ [Home] Platform response:', platformResponse);
+      
       let platformJobs = [];
-      if (platformResponse.success) {
+      if (platformResponse && platformResponse.success && platformResponse.data) {
         platformJobs = platformResponse.data.map(job => ({
           ...job,
           source: 'platform' // Mark as platform job
         }));
+        console.log(`✅ [Home] Loaded ${platformJobs.length} platform jobs`);
+      } else {
+        console.warn('⚠️ [Home] Platform jobs fetch unsuccessful or no data:', platformResponse);
       }
 
       // Fetch external jobs from public APIs (Remotive, etc.)
       let externalJobs = [];
       try {
+        console.log('📡 [Home] Fetching external jobs...');
         const externalResponse = await getExternalJobs();
-        if (externalResponse.success && externalResponse.data) {
+        console.log('✅ [Home] External response:', externalResponse);
+        
+        if (externalResponse && externalResponse.success && externalResponse.data) {
           externalJobs = externalResponse.data.map(job => ({
             ...job,
             source: 'external' // Already marked in backend
           }));
+          console.log(`✅ [Home] Loaded ${externalJobs.length} external jobs`);
         }
       } catch (externalError) {
         // If external API fails, continue with platform jobs only
-        console.error('Error fetching external jobs:', externalError);
+        console.error('❌ [Home] Error fetching external jobs:', externalError);
+        if (externalError.response) {
+          console.error('Response data:', externalError.response.data);
+          console.error('Response status:', externalError.response.status);
+        }
       }
 
       // Merge both job sources and show latest 9 jobs
       const allJobs = [...platformJobs, ...externalJobs];
+      console.log(`📊 [Home] Total jobs fetched: ${allJobs.length} (${platformJobs.length} platform + ${externalJobs.length} external)`);
+      
       setJobs(allJobs.slice(0, 9));
+      
+      if (allJobs.length === 0) {
+        console.warn('⚠️ [Home] No jobs available. Possible reasons:');
+        console.warn('  1. Backend not deployed or not accessible');
+        console.warn('  2. No jobs in MongoDB database (run seed script)');
+        console.warn('  3. API URL misconfigured');
+        console.warn('  4. CORS blocking the request');
+      }
     } catch (error) {
-      console.error('Error fetching jobs:', error);
+      console.error('❌ [Home] Error fetching jobs:', error);
+      if (error.response) {
+        console.error('Response error:', error.response.data);
+        console.error('Status:', error.response.status);
+      } else if (error.request) {
+        console.error('No response from server. Backend might be down.');
+        console.error('Request:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
     } finally {
       setLoading(false);
+      console.log('✅ [Home] Fetch complete');
     }
   };
 
@@ -187,7 +223,13 @@ const Home = () => {
           // Empty State
           <div className="text-center py-20 bg-dark-850/50 backdrop-blur-xl rounded-xl shadow-card border border-white/5">
             <div className="text-2xl font-bold text-white mb-3">No jobs available</div>
-            <div className="text-base text-gray-400">Check back soon for new opportunities</div>
+            <div className="text-base text-gray-400 mb-4">Check back soon for new opportunities</div>
+            <div className="text-xs text-gray-500 mt-4">
+              <p>If you're the admin:</p>
+              <p className="mt-1">1. Check browser console for API errors (F12)</p>
+              <p>2. Verify backend is deployed and accessible</p>
+              <p>3. Run seed script: <code className="bg-dark-800 px-2 py-1 rounded">node scripts/seedJobs.js</code></p>
+            </div>
           </div>
         ) : (
           // Jobs Grid - Consistent spacing

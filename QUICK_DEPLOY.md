@@ -4,10 +4,7 @@
 
 ### Backend (Vercel Dashboard)
 ```
-MONGO_URI=mongodb+srv://job-finder:%40Sahil9505@jobfinder.jpepkiy.mongodb.net/jobfindermain?appName=JobFinder
-JWT_SECRET=31385b98ccd53f62ba13085e03635254ae979ca65843d8fc60cefe73f3ecd2aa
-FRONTEND_URL=https://your-frontend-domain.vercel.app
-NODE_ENV=production
+
 ```
 
 ### Frontend (Vercel Dashboard)
