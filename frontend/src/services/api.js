@@ -2,7 +2,11 @@
 import axios from 'axios';
 
 // Base URL for the backend API (uses environment variable)
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3100/api';
+// For Vercel: Environment variables must be set in the Vercel dashboard
+const API_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.PROD 
+    ? 'https://job-finder-bice-eta.vercel.app/api' 
+    : 'http://localhost:3100/api');
 
 // Create axios instance with base URL
 const api = axios.create({
