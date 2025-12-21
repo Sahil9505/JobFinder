@@ -22,6 +22,40 @@ const ApiTest = () => {
     console.log(`[ApiTest] ${message}`);
   };
 
+  const clearAllData = () => {
+    const confirmed = window.confirm(
+      '⚠️ This will clear all localStorage and sessionStorage data.\n\n' +
+      'You will be logged out and all local data will be removed.\n\n' +
+      'Continue?'
+    );
+    
+    if (confirmed) {
+      addLog('🧹 Clearing all browser storage...', 'info');
+      
+      // List what's being cleared
+      const lsKeys = Object.keys(localStorage);
+      const ssKeys = Object.keys(sessionStorage);
+      
+      if (lsKeys.length > 0) {
+        addLog(`Found ${lsKeys.length} localStorage items: ${lsKeys.join(', ')}`, 'info');
+      }
+      if (ssKeys.length > 0) {
+        addLog(`Found ${ssKeys.length} sessionStorage items: ${ssKeys.join(', ')}`, 'info');
+      }
+      
+      // Clear storage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      addLog('✅ Storage cleared successfully!', 'success');
+      addLog('🔄 Reloading page in 2 seconds...', 'info');
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    }
+  };
+
   const testAll = async () => {
     setTesting(true);
     setLogs([]);
