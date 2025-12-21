@@ -37,9 +37,9 @@ app.use(cors({
             return callback(null, true);
         }
         
-        // Allow any Vercel/Render preview deployment URLs
-        if (origin.includes('.vercel.app') || origin.includes('.onrender.com')) {
-            console.log(`✓ CORS: Allowing deployment origin: ${origin}`);
+        // Allow any Vercel preview deployment URLs
+        if (origin.includes('.vercel.app')) {
+            console.log(`✓ CORS: Allowing Vercel origin: ${origin}`);
             return callback(null, true);
         }
         
