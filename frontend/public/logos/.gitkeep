@@ -1,0 +1,31 @@
+# Sample Company Logos
+
+Place your company logo files here. Example structure:
+
+```
+logos/
+├── google.png
+├── microsoft.png
+├── amazon.png
+├── meta.png
+├── apple.png
+├── tcs.png
+├── infosys.png
+└── ... (add more)
+```
+
+## Quick Start
+
+1. Download company logos (PNG or SVG format)
+2. Rename to lowercase with no spaces (e.g., `microsoft.png`)
+3. Add the mapping in `src/utils/companyLogoMap.js`
+4. The logo will automatically appear in job/company cards!
+
+## Logo Requirements
+
+- **Format**: PNG (transparent) or SVG
+- **Size**: 200x200 to 400x400 pixels
+- **File naming**: lowercase, no spaces (e.g., `tcs.png`)
+- **Max size**: Under 50KB (recommended)
+
+See the full README.md in this directory for detailed instructions.

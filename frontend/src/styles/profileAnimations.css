@@ -1,0 +1,184 @@
+/* Profile Status Animation Styles */
+
+/* Smooth number transition animation */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-count-up {
+  animation: countUp 0.6s ease-out;
+}
+
+/* Progress circle pulse */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+}
+
+.pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(139, 92, 246, 0.1) 0%,
+    rgba(217, 70, 239, 0.2) 50%,
+    rgba(139, 92, 246, 0.1) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* Checklist item slide in */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.4s ease-out forwards;
+}
+
+/* Staggered animation delays */
+.animate-delay-100 {
+  animation-delay: 0.1s;
+}
+
+.animate-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animate-delay-300 {
+  animation-delay: 0.3s;
+}
+
+.animate-delay-400 {
+  animation-delay: 0.4s;
+}
+
+/* Stat card hover glow */
+.stat-card-glow {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.stat-card-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 0.75rem;
+  background: linear-gradient(45deg, #8b5cf6, #d946ef);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  filter: blur(8px);
+}
+
+.stat-card-glow:hover::before {
+  opacity: 0.3;
+}
+
+/* Responsive profile completion circle */
+@media (max-width: 640px) {
+  .profile-completion-circle {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .profile-completion-circle svg {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .profile-completion-circle .percentage-text {
+    font-size: 1.5rem;
+  }
+}
+
+/* Smooth color transitions for checklist items */
+.checklist-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.checklist-item.completed {
+  transform: scale(1.02);
+}
+
+/* Loading skeleton pulse */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeleton-pulse {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Number roll-up effect */
+@keyframes rollUp {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.roll-up {
+  animation: rollUp 0.5s ease-out;
+}
+
+/* Gradient background animation for cards */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animated-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
