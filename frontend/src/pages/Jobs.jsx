@@ -136,8 +136,13 @@ const Jobs = () => {
     try {
       setLoading(true);
       
+      // Debug: Log the API URL being used
+      console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:3100/api');
+      
       // Fetch platform jobs from MongoDB (our database) - request India-only
       const platformResponse = await getJobs({ country: 'India' });
+      console.log('Platform response:', platformResponse);
+      
       let platformJobs = [];
       if (platformResponse.success) {
         // Add source field to platform jobs
@@ -145,6 +150,9 @@ const Jobs = () => {
           ...job,
           source: 'platform' // Mark as platform job
         }));
+        console.log(`Fetched ${platformJobs.length} platform jobs`);
+      } else {
+        console.warn('Platform jobs fetch unsuccessful:', platformResponse);
       }
 
       // Fetch external jobs from public APIs (Remotive, etc.)
@@ -156,6 +164,7 @@ const Jobs = () => {
             ...job,
             source: 'external' // Already marked in backend, but ensure it's there
           }));
+          console.log(`Fetched ${externalJobs.length} external jobs`);
         }
       } catch (externalError) {
         // If external API fails, continue with platform jobs only
@@ -165,11 +174,13 @@ const Jobs = () => {
 
       // Merge both job sources into one array
       const allJobs = [...platformJobs, ...externalJobs];
+      console.log(`Total jobs: ${allJobs.length}`);
       
       setJobs(allJobs);
       setFilteredJobs(allJobs);
     } catch (error) {
       console.error('Error fetching jobs:', error);
+      console.error('Error details:', error.response?.data || error.message);
       // Even on error, try to show what we have
       setJobs([]);
       setFilteredJobs([]);

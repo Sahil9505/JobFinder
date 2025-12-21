@@ -2,6 +2,8 @@
 const express = require('express');
 // Import Job model to interact with database
 const Job = require('../models/Job');
+// Import DB connection
+const connectDB = require('../config/db');
 
 // Create router to handle routes
 const router = express.Router();
@@ -9,6 +11,9 @@ const router = express.Router();
 // POST /api/jobs/add - Add a new job or internship
 router.post('/add', async (req, res) => {
     try {
+        // Ensure database connection
+        await connectDB();
+        
         // Get job details from request body
         const { title, company, location, type, description } = req.body;
 
@@ -110,6 +115,9 @@ function enrichJob(j) {
 // GET /api/jobs - Get all jobs and internships
 router.get('/', async (req, res) => {
     try {
+        // Ensure database connection
+        await connectDB();
+        
         // Support query filters: country=India, platform, city, type (Job/Internship)
         const { country, platform, city, type } = req.query;
 
@@ -173,6 +181,9 @@ router.get('/', async (req, res) => {
 // GET /api/jobs/:id - Get a single job by ID
 router.get('/:id', async (req, res) => {
     try {
+        // Ensure database connection
+        await connectDB();
+        
         // Get job ID from URL parameters
         const jobId = req.params.id;
 
