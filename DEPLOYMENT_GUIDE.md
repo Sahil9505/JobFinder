@@ -61,8 +61,8 @@ git push -u origin main
    Click "Environment Variables" and add:
    
    ```
-   MONGO_URI = mongodb+srv://job-finder:%40Sahil9505@jobfinder.jpepkiy.mongodb.net/jobfindermain?appName=JobFinder
-   JWT_SECRET = 31385b98ccd53f62ba13085e03635254ae979ca65843d8fc60cefe73f3ecd2aa
+   MONGO_URI = your_mongodb_connection_string_here
+   JWT_SECRET = your_jwt_secret_key_here
    NODE_ENV = production
    FRONTEND_URL = https://YOUR-FRONTEND-URL.vercel.app
    ```
