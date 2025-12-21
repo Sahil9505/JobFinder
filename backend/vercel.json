@@ -1,12 +1,18 @@
 {
+  "version": 2,
+  "functions": {
+    "server.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
-    {
-      "source": "/uploads/(.*)",
-      "destination": "/server.js"
-    },
     {
       "source": "/(.*)",
       "destination": "/server.js"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
