@@ -24,13 +24,39 @@ The frontend is deployed but **NOT fetching jobs** from the backend. This is 100
 
 ### Most Likely Causes (in order):
 
-1. **Missing `VITE_API_URL` in Vercel** ⚠️ (95% probability)
-2. **CORS blocking frontend domain** (4% probability)
-3. **Frontend using wrong/cached API URL** (1% probability)
+1. **🧹 Browser cache from localhost testing** ⚠️ (40% probability)
+2. **Missing `VITE_API_URL` in Vercel** ⚠️ (40% probability)
+3. **CORS blocking frontend domain** (15% probability)
+4. **Frontend using wrong/cached API URL** (5% probability)
+
+### ⚠️ IMPORTANT: Did you test on localhost before deploying?
+
+If you previously ran the app on `localhost:5173` or `localhost:3100`, your browser may have:
+- Cached localhost API URLs
+- Stored tokens pointing to localhost  
+- DNS/cache confusion between localhost and production
+
+**This can make production fail even when everything is configured correctly!**
 
 ---
 
 ## 🎯 SOLUTION (Step-by-Step)
+
+### Step 0: Clear Browser Cache First! 🧹
+
+**IF YOU TESTED ON LOCALHOST BEFORE DEPLOYING:**
+
+1. Open your deployed frontend (NOT localhost!)
+2. Press **F12** → Go to **Console** tab
+3. Type: `localStorage.clear(); sessionStorage.clear(); location.reload();`
+4. Press **Enter**
+5. Or press **Ctrl+Shift+R** (Cmd+Shift+R on Mac) for hard refresh
+
+**Why?** Browser may be trying to use cached localhost URLs!
+
+See [BROWSER_CLEANUP.md](./BROWSER_CLEANUP.md) for detailed instructions.
+
+---
 
 ### Step 1: Set Frontend Environment Variable in Vercel
 

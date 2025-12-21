@@ -145,10 +145,32 @@ const ApiTest = () => {
           <button
             onClick={testAll}
             disabled={testing}
-            className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 disabled:from-gray-600 disabled:to-gray-600 text-white px-6 py-3 rounded-lg font-bold transition-all"
+            className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 disabled:from-gray-600 disabled:to-gray-600 text-white px-6 py-3 rounded-lg font-bold transition-all mr-3"
           >
             {testing ? '⏳ Testing...' : '▶️  Run All Tests'}
           </button>
+          
+          <button
+            onClick={clearAllData}
+            className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white px-6 py-3 rounded-lg font-bold transition-all"
+          >
+            🧹 Clear Browser Data
+          </button>
+        </div>
+
+        {/* Warning Banner */}
+        <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mt-4">
+          <div className="flex items-start">
+            <svg className="w-5 h-5 text-yellow-400 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div>
+              <p className="text-yellow-300 font-semibold text-sm">Previously used localhost?</p>
+              <p className="text-yellow-200/80 text-xs mt-1">
+                If you tested on localhost before deploying, clear browser data to remove cached localhost URLs and tokens.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Test Results */}

@@ -12,6 +12,29 @@ Issue:    🔧 Configuration Problem
 
 ## 🎯 Fix Steps (Do in Order)
 
+### 0. ⚠️ Clear Browser Cache FIRST (If you used localhost)
+
+**CRITICAL if you tested on localhost before deploying!**
+
+**Quick Method:**
+1. Open your **deployed frontend** (not localhost!)
+2. Press **F12** to open DevTools
+3. Go to **Console** tab
+4. Type: `localStorage.clear(); sessionStorage.clear(); location.reload();`
+5. Press **Enter**
+
+**Or Hard Refresh:**
+- **Windows/Linux:** `Ctrl + Shift + R`
+- **Mac:** `Cmd + Shift + R`
+
+**Or use Diagnostic Page:**
+- Visit `/api-test` on your deployed site
+- Click "🧹 Clear Browser Data" button
+
+📖 **See [BROWSER_CLEANUP.md](./BROWSER_CLEANUP.md) for detailed instructions**
+
+---
+
 ### 1. Set Frontend Environment Variable
 
 **Location:** Vercel Dashboard → Frontend Project → Settings → Environment Variables
