@@ -20,6 +20,16 @@ app.use(cors({
 // This allows us to access req.body in routes
 app.use(express.json());
 
+// Middleware to ensure database connection for each request in production
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (error) {
+        res.status(500).json({ message: 'Database connection failed', error: error.message });
+    }
+});
+
 // Serve uploaded files (resumes)
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -27,24 +37,25 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Define the port number from environment variable or default to 3100
 const PORT = process.env.PORT || 3100;
 
-// Connect to MongoDB database
-// Ensure DB is connected and seed jobs if collection is empty
-connectDB().then(async () => {
-    try {
-        const Job = require('./models/Job');
-        const seedJobs = require('./scripts/seedJobs');
-        const count = await Job.countDocuments();
-        if (count === 0) {
-            console.log('Jobs collection empty — seeding sample jobs...');
-            const seeded = await seedJobs();
-            console.log(`Auto-seeded ${seeded} jobs`);
-        } else {
-            console.log(`Jobs collection has ${count} records`);
+// Connect to MongoDB database (only in development)
+if (process.env.NODE_ENV !== 'production') {
+    connectDB().then(async () => {
+        try {
+            const Job = require('./models/Job');
+            const seedJobs = require('./scripts/seedJobs');
+            const count = await Job.countDocuments();
+            if (count === 0) {
+                console.log('Jobs collection empty — seeding sample jobs...');
+                const seeded = await seedJobs();
+                console.log(`Auto-seeded ${seeded} jobs`);
+            } else {
+                console.log(`Jobs collection has ${count} records`);
+            }
+        } catch (err) {
+            console.error('Error during auto-seed:', err);
         }
-    } catch (err) {
-        console.error('Error during auto-seed:', err);
-    }
-}).catch(err => console.error('DB connection error during startup:', err));
+    }).catch(err => console.error('DB connection error during startup:', err));
+}
 
 // Import auth routes
 const authRoutes = require('./routes/authRoutes');
