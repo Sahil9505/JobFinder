@@ -219,10 +219,6 @@ router.get('/me', protect, (req, res) => {
 // PUT /auth/profile - Update user profile
 router.put('/profile', protect, upload.single('profileImage'), async (req, res) => {
     try {
-        console.log('=== Profile Update Request ===');
-        console.log('Request body:', req.body);
-        console.log('File uploaded:', req.file ? req.file.filename : 'No file');
-        
         const { name, email, phone, username } = req.body;
         const userId = req.user._id;
 

@@ -2,20 +2,25 @@
 import axios from 'axios';
 
 // Base URL for the backend API (uses environment variable)
-// For Vercel: Environment variables must be set in the Vercel dashboard
-const API_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.PROD 
-    ? 'https://job-finder-bice-eta.vercel.app' 
-    : 'http://localhost:3100');
+// IMPORTANT: Set VITE_API_URL to the server origin WITHOUT trailing /api
+// For local: http://localhost:3100
+// For production: Your deployed backend URL (e.g., https://api.example.com)
+const RAW_SERVER_URL = import.meta.env.VITE_API_URL || 'http://localhost:3100';
 
-// Get the base server URL without /api for static assets
-export const getServerURL = () => {
-  return API_URL.replace(/\/api$/, '');
-};
+// Normalize to ensure no trailing slash and no trailing /api
+const SERVER_URL = RAW_SERVER_URL
+  .replace(/\/$/, '')
+  .replace(/\/api\/?$/, '');
+
+// Export the base server URL (for static file references like profile images)
+export const getServerURL = () => SERVER_URL;
+
+// Compute API base URL
+const API_BASE_URL = `${SERVER_URL}/api`;
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -48,30 +53,35 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Enhanced error logging for debugging
-    if (error.response) {
-      // Server responded with error status
-      console.error('API Error Response:', {
-        status: error.response.status,
-        statusText: error.response.statusText,
-        data: error.response.data,
-        url: error.config?.url
-      });
-    } else if (error.request) {
-      // Request made but no response received
-      console.error('API No Response:', {
-        url: error.config?.url,
-        baseURL: error.config?.baseURL,
-        message: 'No response received from server. Check if backend is running.'
-      });
-    } else {
-      // Error setting up request
-      console.error('API Request Setup Error:', error.message);
+    // Enhanced error logging for debugging (suppressed in production)
+    const shouldLog = import.meta.env.DEV || import.meta.env.VITE_DEBUG === 'true';
+    if (shouldLog) {
+      if (error.response) {
+        // Server responded with error status
+        console.error('API Error Response:', {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data,
+          url: error.config?.url
+        });
+      } else if (error.request) {
+        // Request made but no response received
+        console.error('API No Response:', {
+          url: error.config?.url,
+          baseURL: error.config?.baseURL,
+          message: 'No response received from server. Check if backend is running.'
+        });
+      } else {
+        // Error setting up request
+        console.error('API Request Setup Error:', error.message);
+      }
     }
 
     // If token is invalid/expired, remove it and redirect to login
     if (error.response?.status === 401) {
-      console.warn('401 Unauthorized - clearing auth token');
+      if (import.meta.env.DEV || import.meta.env.VITE_DEBUG === 'true') {
+        console.warn('401 Unauthorized - clearing auth token');
+      }
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       // You can redirect to login here if needed

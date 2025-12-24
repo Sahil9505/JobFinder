@@ -45,24 +45,13 @@ router.post('/apply/:jobId', protect, async (req, res) => {
         if (existingApplication) return res.status(400).json({ success: false, message: 'You have already applied for this job' });
 
         // Provide required applicant fields from user profile to satisfy model validation
-        console.log('legacy apply: req.user object:', req.user);
-        try {
-          const obj = req.user.toObject ? req.user.toObject() : req.user;
-          console.log('legacy apply: req.user keys:', Object.keys(obj));
-          console.log('legacy apply: name,email ->', obj.name, obj.email);
-        } catch (ex) {
-          console.log('legacy apply: req.user introspect error', ex.message);
-        }
         // Double-check user record from DB (avoid cases where req.user may be missing fields)
         const dbUser = await require('../models/User').findById(userId).select('name email');
         const fullName = (dbUser && (dbUser.name || dbUser.fullName)) || (req.user && (req.user.name || req.user.fullName)) || req.body.fullName || '';
         const email = (dbUser && dbUser.email) || (req.user && req.user.email) || req.body.email || '';
 
-        console.log('legacy apply: dbUser.name,email ->', fullName, email);
-
         // If profile is missing required applicant fields, return a clear 400 error
         if (!fullName || !email) {
-            console.log('legacy apply: missing required profile fields', { fullNameMissing: !fullName, emailMissing: !email });
             return res.status(400).json({ success: false, message: 'Profile incomplete: name and email are required to apply. Please update your profile.' });
         }
 
@@ -154,7 +143,6 @@ router.post('/applications/apply', protect, upload.single('resume'), async (req,
 
         return res.status(201).json({ success: true, message: 'Application submitted', application: app, data: apps });
     } catch (err) {
-        console.error(err);
         return res.status(500).json({ success: false, message: 'Server error', error: err.message });
     }
 });
@@ -172,7 +160,7 @@ router.patch('/applications/:jobId/cancel', protect, async (req, res) => {
 
         return res.json({ success: true, jobId, data: apps });
     } catch (err) {
-        console.error('Cancel-by-job (patch) error:', err);
+
         return res.status(500).json({ success: false, message: 'Server error' });
     }
 });
@@ -217,7 +205,6 @@ router.get('/applications/my', protect, async (req, res) => {
 
         return res.json({ success: true, data: apps });
     } catch (err) {
-        console.error(err);
         return res.status(500).json({ success: false, message: 'Server error' });
     }
 });
@@ -238,7 +225,6 @@ router.patch('/applications/cancel/:id', protect, async (req, res) => {
         const apps = await Application.find({ userId: req.user._id }).populate({ path: 'jobId', select: 'title company city country jobType type applyType applyUrl' }).sort({ appliedAt: -1 });
         return res.json({ success: true, message: 'Application cancelled', application: updated, data: apps });
     } catch (err) {
-        console.error('Cancel error:', err);
         return res.status(500).json({ success: false, message: 'Server error' });
     }
 });
@@ -258,7 +244,6 @@ router.delete('/applications/:jobId', protect, async (req, res) => {
         const apps = await Application.find({ userId: req.user._id }).populate({ path: 'jobId', select: 'title company city country jobType type applyType applyUrl' }).sort({ appliedAt: -1 });
         return res.json({ success: true, message: 'Application cancelled', application: updated, data: apps });
     } catch (err) {
-        console.error('Cancel-by-job error:', err);
         return res.status(500).json({ success: false, message: 'Server error' });
     }
 });
